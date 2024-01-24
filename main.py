@@ -2,53 +2,6 @@ import tkinter as tk
 from DatabaseProxy import *
 
 
-class DatabaseProxy:
-    def __init__(self):
-        # З'єднання з базою даних
-        self.connection = sqlite3.connect("user_database.db")
-        self.cursor = self.connection.cursor()
-
-    def get_users(self):
-        self.cursor.execute('SELECT * FROM users')
-        data = self.cursor.fetchall()
-
-        return data
-
-    def edit_user(self, id, name, lastname, age, email):
-        if name and age and lastname and email:
-            try:
-                age = int(age)
-                user_to_update = (name, lastname, age, email, id)
-                self.cursor.execute(
-                    "UPDATE users SET ім_я=?, прізвище=?, вік=?, email=? WHERE id=?",
-                    user_to_update
-                )
-                self.connection.commit()
-
-                messagebox.showinfo("Успіх", "Інформація оновлена.")
-            except ValueError:
-                messagebox.showerror("Помилка", "Будь ласка, введіть правильне значення")
-        else:
-            messagebox.showwarning("Попередження", "Будь ласка, заповніть всі поля.")
-
-    def add_user(self, name, lastname, age, email):
-        if name and age and lastname and email:
-            try:
-                age = int(age)
-                user_to_insert = (name, lastname, age, email)
-                self.cursor.execute("INSERT INTO users(ім_я, прізвище, вік, email) VALUES(?,?,?,?)", user_to_insert)
-                self.connection.commit()
-
-                messagebox.showinfo("Успіх", "Користувач доданий до бази даних.")
-            except ValueError:
-                messagebox.showerror("Помилка", "Будь ласка, введіть правильне значення")
-        else:
-            messagebox.showwarning("Попередження", "Будь ласка, заповніть всі поля.")
-
-    def delete_user(self, id):
-        self.cursor.execute('DELETE FROM users WHERE id=' + str(id))
-        self.connection.commit()
-
 class UserDatabaseApp:
     def __init__(self, root):
         self.root = root
@@ -121,27 +74,33 @@ class UserDatabaseApp:
                 self.db.delete_user(id)
 
             def edit(id):
+                user_data = self.db.get_user(id)
+
                 edit_window = tk.Toplevel(self.root)
                 edit_window.title("Редагування користувача")
 
                 label_name = tk.Label(edit_window, text="Ім'я:")
                 label_name.grid(row=0, column=0, padx=10, pady=5)
                 entry_name = tk.Entry(edit_window)
+                entry_name.insert(0, user_data[0][1])
                 entry_name.grid(row=0, column=1, padx=10, pady=5)
 
                 label_lastname = tk.Label(edit_window, text="Прізвище:")
                 label_lastname.grid(row=1, column=0, padx=10, pady=5)
                 entry_lastname = tk.Entry(edit_window)
+                entry_lastname.insert(0, user_data[0][2])
                 entry_lastname.grid(row=1, column=1, padx=10, pady=5)
 
                 label_age = tk.Label(edit_window, text="Вік:")
                 label_age.grid(row=2, column=0, padx=10, pady=5)
                 entry_age = tk.Entry(edit_window)
+                entry_age.insert(0, user_data[0][3])
                 entry_age.grid(row=2, column=1, padx=10, pady=5)
 
                 label_email = tk.Label(edit_window, text="Email:")
                 label_email.grid(row=3, column=0, padx=10, pady=5)
                 entry_email = tk.Entry(edit_window)
+                entry_email.insert(0, user_data[0][4])
                 entry_email.grid(row=3, column=1, padx=10, pady=5)
 
                 button_add = tk.Button(edit_window, text="Змінити", command=lambda: self.db.edit_user(
